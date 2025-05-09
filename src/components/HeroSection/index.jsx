@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Pagination from "./Pagination";
 
 import sofaImage from "../../assets/Images/sofa.png";
-import lightImage from "../../assets/Images/light.png";
 import bgPattern from "../../assets/Images/promotionBg.png";
 import chair from "../../assets/Images/chair.png";
 import interior from "../../assets/Images/interior.png";
@@ -78,22 +77,7 @@ const HeroSection = () => {
                 : "opacity-100 translate-x-0"
             }`}
           >
-            {/* Light bulb image on the left of text (only on first slide) */}
-            {currentSlide === 0 && (
-              <div
-                className="hidden lg:block w-[450px] h-[450px] flex-shrink-0"
-                style={{
-                  marginTop: "-310px",
-                  marginLeft: "-170px", // move to the left
-                }}
-              >
-                <img
-                  src={lightImage}
-                  alt="Light Bulb"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            )}
+            
 
             {/* Text Content */}
             <div>

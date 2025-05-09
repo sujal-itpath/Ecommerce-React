@@ -1,5 +1,53 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Tag, DollarSign, Star, Sliders } from 'lucide-react';
+import { Tag, DollarSign, Star, Sliders, Percent } from 'lucide-react';
+
+// Maps user-friendly names to valid CSS colors
+const colorMap = {
+  "burgundy": "#800020",
+  "steel blue": "steelblue",
+  "smoky teal": "#5f9ea0",
+  "deep purple": "#673ab7",
+  "golden": "gold",
+  "noir black": "#0a0a0a",
+  "meteorite black": "#1c1c1c",
+  "aqua green": "#00ffcc",
+  "matte black": "#2b2b2b",
+  "taupe": "#483c32",
+  "dark steel silver": "#708090",
+ "sand gold": "#cba135"
+};
+
+// Check if a color is valid CSS color
+const isValidColor = (color) => {
+  const s = new Option().style;
+  s.color = '';
+  s.color = color;
+  return s.color !== '';
+};
+
+// Color button with fallback text
+const ColorBadge = ({ color, selected, onClick }) => {
+  const normalized = color.toLowerCase().trim();
+  const renderColor = colorMap[normalized] || normalized;
+  const isColorValid = isValidColor(renderColor);
+
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center justify-center w-8 h-8 rounded-full border shadow-sm transition-all duration-200 ${
+        selected ? 'ring-2 ring-offset-2 ring-blue-600 scale-110' : ''
+      }`}
+      title={color}
+      style={isColorValid ? { backgroundColor: renderColor } : {}}
+    >
+      {!isColorValid && (
+        <span className="text-[10px] text-gray-700 font-medium capitalize px-1">
+          {color}
+        </span>
+      )}
+    </button>
+  );
+};
 
 const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) => {
   const [filters, setFilters] = useState(selectedFilters || {
@@ -13,8 +61,7 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
 
   const debounceTimeoutRef = useRef(null);
 
-  // Memoize the unique values to prevent unnecessary recalculations
-  const { brands, categories, colors } = useMemo(() => {
+  const { uniqueBrands, uniqueCategories, uniqueColors } = useMemo(() => {
     const unique = (array, key) => {
       if (!Array.isArray(array)) return [];
       const values = array
@@ -25,13 +72,12 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
     };
 
     return {
-      brands: unique(allProducts, 'brand'),
-      categories: unique(allProducts, 'category'),
-      colors: unique(allProducts, 'color'),
+      uniqueBrands: unique(allProducts, 'brand'),
+      uniqueCategories: unique(allProducts, 'category'),
+      uniqueColors: unique(allProducts, 'color'),
     };
   }, [allProducts]);
 
-  // Update local filters when selectedFilters prop changes
   useEffect(() => {
     if (selectedFilters) {
       setFilters(selectedFilters);
@@ -63,7 +109,7 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
     }
     debounceTimeoutRef.current = setTimeout(() => {
       onFilterChange(filters);
-    }, 300); // Reduced debounce time for better responsiveness
+    }, 300);
   };
 
   useEffect(() => {
@@ -95,7 +141,7 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
     });
 
   return (
-    <div className="space-y-6 text-sm">
+    <div className="space-y-6 text-sm p-4 bg-white rounded-lg shadow-md border">
       {/* Brand */}
       <div>
         <div className="flex items-center gap-2 mb-3 text-gray-800">
@@ -103,14 +149,14 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
           <h4 className="font-medium">Brand</h4>
         </div>
         <div className="space-y-1 max-h-40 overflow-y-auto">
-          {renderCheckboxList('brand', brands)}
+          {renderCheckboxList('brand', uniqueBrands)}
         </div>
       </div>
 
       {/* Discount */}
       <div className="pt-4 border-t border-gray-100">
         <div className="flex items-center gap-2 mb-3 text-gray-800">
-          <Sliders className="w-4 h-4" />
+          <Percent className="w-4 h-4" />
           <h4 className="font-medium">Discount Offer</h4>
         </div>
         {['10', '20', '30', '50'].map(d => (
@@ -158,7 +204,7 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
           <h4 className="font-medium">Categories</h4>
         </div>
         <div className="space-y-1 max-h-40 overflow-y-auto">
-          {renderCheckboxList('category', categories)}
+          {renderCheckboxList('category', uniqueCategories)}
         </div>
       </div>
 
@@ -198,18 +244,18 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
           <Sliders className="w-4 h-4" />
           <h4 className="font-medium">Filter by Color</h4>
         </div>
-        <div className="flex gap-3 flex-wrap">
-          {colors.map(clr => (
-            <button
-              key={clr}
-              onClick={() => handleCheck('color', clr)}
-              className={`rounded-full w-6 h-6 border-2 transition-all duration-200 ${
-                filters.color.includes(clr.toLowerCase()) ? 'ring-2 ring-offset-1 ring-black' : ''
-              }`}
-              style={{ backgroundColor: clr }}
-              title={clr}
-            />
-          ))}
+        <div className="flex gap-2 flex-wrap">
+          {uniqueColors.map(color => {
+            const normalizedColor = color.toLowerCase();
+            return (
+              <ColorBadge
+                key={color}
+                color={normalizedColor}
+                selected={filters.color.includes(normalizedColor)}
+                onClick={() => handleCheck('color', normalizedColor)}
+              />
+            );
+          })}
         </div>
       </div>
     </div>

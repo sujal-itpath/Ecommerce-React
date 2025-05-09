@@ -1,80 +1,109 @@
-import { Routes, Route } from 'react-router-dom';
-import HomePage from '../pages/HomePage';
-import ProductPage from '../pages/ProductPages';
-import ProductDetailPage from '../pages/ProductDetailPage';
-import CartPage from '../pages/CartPage';
-import CheckoutPage from '../pages/CheckoutPage';
-import PageContainer from '../components/Layout/PageContainer'; // Adjust the path as needed
-import Wishlist from '../components/Wishlist';
-import AboutUs from '../pages/AboutUs';
-import Login from '../forms/Login';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { Suspense, lazy, memo } from 'react';
+import PageContainer from '../components/Layout/PageContainer';
 import ProtectedRoutes from './ProtectedRoutes';
 import PublicRoutes from './PublicRoutes';
-import OrderConfirm from '../components/OrderConfirm';
-import NotFound from '../components/NotFound';
-import OrderPage from '../pages/OrderPage';
-import FaqPage from '../pages/FaqPage';
+import LoadingSpinner from '../components/LoadingSpinner';
+
+// Lazy load components with prefetching
+const lazyLoad = (importFunc) => {
+  const Component = lazy(importFunc);
+  // Prefetch the component
+  importFunc();
+  return Component;
+};
+
+// Memoized components to prevent unnecessary re-renders
+const HomePage = memo(lazyLoad(() => import('../pages/HomePage')));
+const ProductPage = memo(lazyLoad(() => import('../pages/ProductPages')));
+const ProductDetailPage = memo(lazyLoad(() => import('../pages/ProductDetailPage')));
+const CartPage = memo(lazyLoad(() => import('../pages/CartPage')));
+const CheckoutPage = memo(lazyLoad(() => import('../pages/CheckoutPage')));
+const Wishlist = memo(lazyLoad(() => import('../components/Wishlist')));
+const AboutUs = memo(lazyLoad(() => import('../pages/AboutUs')));
+const Login = memo(lazyLoad(() => import('../forms/Login')));
+const OrderConfirm = memo(lazyLoad(() => import('../components/OrderConfirm')));
+const NotFound = memo(lazyLoad(() => import('../components/NotFound')));
+const OrderPage = memo(lazyLoad(() => import('../pages/OrderPage')));
+const FaqPage = memo(lazyLoad(() => import('../pages/FaqPage')));
+
+// Memoized loading component
+const RouteLoading = memo(() => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pink-50 to-white">
+    <LoadingSpinner />
+  </div>
+));
+
+// Memoized route wrapper to prevent unnecessary re-renders
+const RouteWrapper = memo(({ children }) => (
+  <PageContainer>
+    <Suspense fallback={<RouteLoading />}>
+      {children}
+    </Suspense>
+  </PageContainer>
+));
 
 const RouteComponent = () => {
+  const location = useLocation();
+
   return (
-    <Routes>
+    <Routes location={location} key={location.pathname}>
       {/* Public Routes */}
       <Route element={<PublicRoutes />}>
         <Route
           path="/"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <HomePage />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
         <Route
           path="/products"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <ProductPage />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
         <Route
           path="/products/:id"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <ProductDetailPage />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
         <Route
           path="/about"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <AboutUs />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
         <Route
           path="/login"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <Login />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
         <Route
           path="/faq"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <FaqPage />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
-
         <Route
           path="*"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <NotFound />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
       </Route>
@@ -84,47 +113,46 @@ const RouteComponent = () => {
         <Route
           path="/cart"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <CartPage />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
         <Route
           path="/cart/checkout"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <CheckoutPage />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
         <Route
           path="/wishlist"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <Wishlist />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
         <Route
           path="/orderconfirm"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <OrderConfirm />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
         <Route
           path="/orders"
           element={
-            <PageContainer>
+            <RouteWrapper>
               <OrderPage />
-            </PageContainer>
+            </RouteWrapper>
           }
         />
-        
       </Route>
     </Routes>
   );
 };
 
-export default RouteComponent;
+export default memo(RouteComponent);

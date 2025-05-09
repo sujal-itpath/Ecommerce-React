@@ -6,7 +6,7 @@ import useOrderStore from '../../store/orderStore';
 const Orders = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { orders, loadOrders } = useOrderStore();
+  const { orders, loadOrders, removeOrder } = useOrderStore();
   const { order: newOrder } = location.state || {};
 
   useEffect(() => {
@@ -30,14 +30,33 @@ const Orders = () => {
     return formatDate(date);
   };
 
-  if (orders.length === 0) {
+  // Check if delivery date has passed
+  const hasDeliveryDatePassed = (orderDate) => {
+    const deliveryDate = new Date(orderDate);
+    deliveryDate.setDate(deliveryDate.getDate() + 2);
+    return deliveryDate < new Date();
+  };
+
+  // Filter out orders with passed delivery dates
+  const activeOrders = orders.filter(order => !hasDeliveryDatePassed(order.date));
+
+  // Remove orders with passed delivery dates
+  useEffect(() => {
+    orders.forEach(order => {
+      if (hasDeliveryDatePassed(order.date)) {
+        removeOrder(order.id);
+      }
+    });
+  }, [orders, removeOrder]);
+
+  if (activeOrders.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="container mx-auto px-4 md:px-8 max-w-[1400px]">
           <div className="max-w-[1200px] mx-auto">
             <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 text-center">
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">No Orders Yet</h1>
-              <p className="text-gray-600 mb-6">You haven't placed any orders yet.</p>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">No Active Orders</h1>
+              <p className="text-gray-600 mb-6">You don't have any active orders at the moment.</p>
               <button
                 onClick={() => navigate('/')}
                 className="px-6 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
@@ -69,7 +88,7 @@ const Orders = () => {
 
           {/* Orders List */}
           <div className="space-y-6">
-            {orders.map((order) => (
+            {activeOrders.map((order) => (
               <div key={order.id} className="bg-white rounded-xl shadow-sm p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -111,7 +130,8 @@ const Orders = () => {
                       <p className="text-sm text-gray-600">
                         {order.shippingAddress.firstName} {order.shippingAddress.lastName}<br />
                         {order.shippingAddress.address}<br />
-                        {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
+                        {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}<br/>
+                        Phone : {order.shippingAddress.phone}
                       </p>
                     </div>
                     <div>

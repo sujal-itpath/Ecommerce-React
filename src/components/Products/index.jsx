@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
+import { useSearchParams } from "react-router-dom";
 import ProductList from "./ProductList";
 import SidebarFilters from "./SidebarFilters";
 import PageContainer from "../Layout/PageContainer";
@@ -9,24 +10,39 @@ import SearchBar from "./SearchBar";
 import SortOptions from "./SortOptions";
 import PaginationLoader from './PaginationLoader';
 
-const Products = () => {
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [filters, setFilters] = useState({
-    brand: [],
-    discount: [],
-    rating: [],
-    category: [],
-    price: [0, 1000],
-    color: [],
-  });
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortOption, setSortOption] = useState("Most Popular");
+// Global cache for products data
+const globalCache = {
+  products: null,
+  timestamp: null,
+  CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
+};
 
-  const [limit] = useState(8);
-  const [page, setPage] = useState(1);
+const Products = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState(() => {
+    // Initialize from cache if available
+    if (globalCache.products && 
+        globalCache.timestamp && 
+        Date.now() - globalCache.timestamp < globalCache.CACHE_DURATION) {
+      return globalCache.products;
+    }
+    return [];
+  });
+  const [filters, setFilters] = useState({
+    brand: searchParams.get('brand')?.split(',') || [],
+    discount: searchParams.get('discount')?.split(',') || [],
+    rating: searchParams.get('rating')?.split(',') || [],
+    category: searchParams.get('category')?.split(',') || [],
+    price: searchParams.get('price')?.split(',')?.map(Number) || [0, 1000],
+    color: searchParams.get('color')?.split(',') || [],
+  });
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
+  const [sortOption, setSortOption] = useState(searchParams.get('sort') || "Most Popular");
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [limit] = useState(8);
+  const [page, setPage] = useState(1);
 
   const observer = useRef();
   const lastProductRef = useCallback(
@@ -45,20 +61,66 @@ const Products = () => {
     [loading, hasMore]
   );
 
+  // Load products only if not in cache
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (allProducts.length > 0) return; // Skip if we already have products
+
+      setLoading(true);
+      try {
+        const res = await axios.get(`${API_BASE_URL}${PRODUCT_API_PATHS.all}`);
+        const productsData = res.data.products || res.data;
+        
+        // Update cache
+        globalCache.products = productsData;
+        globalCache.timestamp = Date.now();
+        
+        setAllProducts(productsData);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const updateURLParams = (newFilters, newSearch, newSort) => {
+    const params = new URLSearchParams();
+    
+    if (newFilters.brand.length) params.set('brand', newFilters.brand.join(','));
+    if (newFilters.discount.length) params.set('discount', newFilters.discount.join(','));
+    if (newFilters.rating.length) params.set('rating', newFilters.rating.join(','));
+    if (newFilters.category.length) params.set('category', newFilters.category.join(','));
+    if (newFilters.price[0] !== 0 || newFilters.price[1] !== 1000) params.set('price', newFilters.price.join(','));
+    if (newFilters.color.length) params.set('color', newFilters.color.join(','));
+    if (newSearch) params.set('search', newSearch);
+    if (newSort !== "Most Popular") params.set('sort', newSort);
+
+    setSearchParams(params);
+  };
+
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
+    setPage(1);
+    updateURLParams(newFilters, searchTerm, sortOption);
   };
 
   const handleSearchChange = (term) => {
     setSearchTerm(term);
+    setPage(1);
+    updateURLParams(filters, term, sortOption);
   };
 
   const handleSortChange = (option) => {
     setSortOption(option);
+    setPage(1);
+    updateURLParams(filters, searchTerm, option);
   };
 
   const applyFilters = useCallback(() => {
-    let filtered = [...products];
+    let filtered = [...allProducts];
 
     // Apply all filters in sequence
     filtered = filtered.filter(product => {
@@ -124,49 +186,27 @@ const Products = () => {
     }
 
     setFilteredProducts(filtered);
-  }, [products, filters, searchTerm, sortOption]);
+  }, [allProducts, filters, searchTerm, sortOption]);
 
   const resetFilters = () => {
-    setFilters({
+    const defaultFilters = {
       brand: [],
       discount: [],
       rating: [],
       category: [],
       price: [0, 1000],
       color: [],
-    });
+    };
+    setFilters(defaultFilters);
     setSearchTerm("");
     setSortOption("Most Popular");
+    setPage(1);
+    setSearchParams({});
   };
 
   const handleLoadMore = () => {
     setPage((prev) => prev + 1);
   };
-
-  // Initial load of products
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`${API_BASE_URL}${PRODUCT_API_PATHS.all}?page=${page}&limit=${limit}`);
-        const newProducts = res.data.products || res.data;
-        
-        // Ensure unique products based on ID
-        setProducts(prev => {
-          const existingIds = new Set(prev.map(p => p.id));
-          const uniqueNewProducts = newProducts.filter(p => !existingIds.has(p.id));
-          return [...prev, ...uniqueNewProducts];
-        });
-        
-        if (newProducts.length < limit) setHasMore(false);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-      setLoading(false);
-    };
-
-    fetchProducts();
-  }, [page, limit]);
 
   // Apply filters whenever any filter-related state changes
   useEffect(() => {
@@ -191,7 +231,7 @@ const Products = () => {
   
       <div className="flex flex-col lg:flex-row gap-8">
         <aside className="w-full lg:w-1/4 lg:sticky lg:top-4 lg:self-start">
-          <div className=" backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-gray-100 max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-pink-300 scrollbar-track-gray-100">
+          <div className="backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-gray-100 max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-pink-300 scrollbar-track-gray-100">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-800">Filters</h3>
               <button
@@ -203,14 +243,14 @@ const Products = () => {
             </div>
             <SidebarFilters
               onFilterChange={handleFilterChange}
-              allProducts={products}
+              allProducts={allProducts}
               selectedFilters={filters}
             />
           </div>
         </aside>
   
         <main className="flex-1">
-          <div className="mb-6 flex items-center justify-between  backdrop-blur-sm p-4 rounded-xl border border-gray-100">
+          <div className="mb-6 flex items-center justify-between backdrop-blur-sm p-4 rounded-xl border border-gray-100">
             <div className="flex items-center gap-2 text-gray-600">
               <ShoppingBag className="h-5 w-5" />
               <span>{filteredProducts.length} products</span>
@@ -218,9 +258,9 @@ const Products = () => {
             <SortOptions value={sortOption} onChange={handleSortChange} />
           </div>
   
-          <ProductList products={filteredProducts} loading={loading} />
+          <ProductList products={filteredProducts.slice(0, page * limit)} loading={loading} />
   
-          {filteredProducts.length > 0 && (
+          {filteredProducts.length > page * limit && (
             <PaginationLoader loading={loading} hasMore={hasMore} onLoadMore={handleLoadMore} />
           )}
   

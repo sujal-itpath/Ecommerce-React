@@ -473,13 +473,14 @@ const Checkout = () => {
                       <p className="text-sm text-gray-600">
                         {shippingInfo.firstName} {shippingInfo.lastName}<br />
                         {shippingInfo.address}<br />
-                        {shippingInfo.city}, {shippingInfo.state} {shippingInfo.zipCode}
+                        {shippingInfo.city}, {shippingInfo.state} {shippingInfo.zipCode}<br />
+                        Phone : {shippingInfo.phone}
                       </p>
                     </div>
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h4 className="font-medium mb-2">Payment Information</h4>
                       <p className="text-sm text-gray-600">
-                        {paymentInfo.paymentMethod === 'credit' ? 'Credit' : 'Debit'} Card ending in {paymentInfo.cardNumber.slice(-4)}
+                        {paymentInfo.paymentMethod === 'credit' ? 'Credit' : 'Debit'} xxxx xxxx xxxx {paymentInfo.cardNumber.slice(-4)}
                       </p>
                     </div>
                   </div>
