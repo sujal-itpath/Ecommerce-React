@@ -40,7 +40,7 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
   const [sortOption, setSortOption] = useState(searchParams.get('sort') || "Most Popular");
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore] = useState(true);
   const [limit] = useState(8);
   const [page, setPage] = useState(1);
 
