@@ -11,11 +11,11 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white shadow-sm py-4">
+    <header className="bg-white shadow-sm py-3">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="/" className="text-2xl font-bold text-gray-900 tracking-wide">
+          <a href="/" className="text-3xl font-bold text-gray-900 tracking-wide">
             Hekto
           </a>
 
