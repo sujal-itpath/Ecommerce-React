@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { useWishlistStore } from "../../../store/wishlistStore";
 import { useCartStore } from '../../../store/cartStore';
 
-import SnackBar from "../../common/Snackbar";
+import SnackBar from "../../common/SnackBar";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();

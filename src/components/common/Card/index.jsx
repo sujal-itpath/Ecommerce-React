@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useWishlistStore } from "../../../store/wishlistStore";
 import { useCartStore } from '../../../store/cartStore';
 
-import SnackBar from "../Snackbar";
+import SnackBar from "../SnackBar";
 
 const Card = ({ product }) => {
   const navigate = useNavigate();
