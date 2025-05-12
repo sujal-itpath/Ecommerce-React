@@ -1,5 +1,6 @@
 import React from 'react';
-import { useCart } from '../../context/CartContext';
+import { useCartStore } from '../../store/cartStore';
+
 import {
   Box,
   Typography,
@@ -15,7 +16,15 @@ import { Add, Remove, Delete } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 const CartPage = () => {
-  const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
+  const {
+    cartItems,
+    removeFromCart,
+    updateQuantity,
+    getCartTotal,
+    clearCart,
+  } = useCartStore();
+  
+
   const navigate = useNavigate();
 
   const handleQuantityUpdate = (id, newQuantity) => {

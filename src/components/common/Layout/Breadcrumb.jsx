@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, Link, useParams } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import axios from 'axios';
-import { API_BASE_URL, PRODUCT_API_PATHS } from '../../constants/apiConstants';
+import { API_BASE_URL, PRODUCT_API_PATHS } from '../../../api/constants/apiConstants';
 
 const Breadcrumb = () => {
   const location = useLocation();

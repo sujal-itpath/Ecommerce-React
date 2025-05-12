@@ -1,9 +1,9 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Suspense, lazy, memo } from 'react';
-import PageContainer from '../components/Layout/PageContainer';
+import PageContainer from '../components/common/Layout/PageContainer';
 import ProtectedRoutes from './ProtectedRoutes';
 import PublicRoutes from './PublicRoutes';
-import LoadingSpinner from '../components/LoadingSpinner';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 // Lazy load components with prefetching
 const lazyLoad = (importFunc) => {
@@ -23,7 +23,7 @@ const Wishlist = memo(lazyLoad(() => import('../components/Wishlist')));
 const AboutUs = memo(lazyLoad(() => import('../pages/AboutUs')));
 const Login = memo(lazyLoad(() => import('../forms/Login')));
 const OrderConfirm = memo(lazyLoad(() => import('../components/OrderConfirm')));
-const NotFound = memo(lazyLoad(() => import('../components/NotFound')));
+const NotFound = memo(lazyLoad(() => import('../components/common/NotFound')));
 const OrderPage = memo(lazyLoad(() => import('../pages/OrderPage')));
 const FaqPage = memo(lazyLoad(() => import('../pages/FaqPage')));
 

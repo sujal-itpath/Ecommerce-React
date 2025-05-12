@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useCart } from '../../context/CartContext';
+import { useCartStore } from '../../store/cartStore';
+
 import { useNavigate } from 'react-router-dom';
 import useOrderStore from '../../store/orderStore';
 
 const Checkout = () => {
-  const { cartItems, clearCart } = useCart();
+  const { cartItems, clearCart } = useCartStore();
   const addOrder = useOrderStore((state) => state.addOrder);
   const [activeStep, setActiveStep] = useState(0);
   const [shippingInfo, setShippingInfo] = useState({
@@ -65,39 +66,83 @@ const Checkout = () => {
     if (!paymentInfo.expiryDate.trim()) newErrors.expiryDate = 'Expiry date is required';
     if (!/^\d{2}\/\d{2}$/.test(paymentInfo.expiryDate)) newErrors.expiryDate = 'Invalid expiry date';
     if (!paymentInfo.cvv.trim()) newErrors.cvv = 'CVV is required';
-    if (!/^\d{3,4}$/.test(paymentInfo.cvv)) newErrors.cvv = 'Invalid CVV';
-
+    if (!/^\d{3}$/.test(paymentInfo.cvv)) newErrors.cvv = 'Invalid CVV';
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
+  
   const handleShippingChange = (e) => {
+    const { name, value } = e.target;
+  
+    let updatedValue = value;
+  
+    if (name === 'zipCode') {
+      // Allow only digits and max 6
+      updatedValue = value.replace(/\D/g, '').substring(0, 6);
+    }
+  
     setShippingInfo({
       ...shippingInfo,
-      [e.target.name]: e.target.value,
+      [name]: updatedValue,
     });
+  
     // Clear error when user starts typing
-    if (errors[e.target.name]) {
+    if (errors[name]) {
       setErrors({
         ...errors,
-        [e.target.name]: '',
+        [name]: '',
       });
     }
   };
-
+  
   const handlePaymentChange = (e) => {
-    setPaymentInfo({
-      ...paymentInfo,
-      [e.target.name]: e.target.value,
-    });
-    // Clear error when user starts typing
-    if (errors[e.target.name]) {
+    const { name, value } = e.target;
+  
+    if (name === 'cardNumber') {
+      const digitsOnly = value.replace(/\D/g, '').substring(0, 16);
+      const formatted = digitsOnly.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+      setPaymentInfo({ ...paymentInfo, cardNumber: formatted });
+  
+    } else if (name === 'expiryDate') {
+      let digits = value.replace(/\D/g, '').substring(0, 4);
+      if (digits.length >= 3) {
+        digits = digits.replace(/(\d{2})(\d{1,2})/, '$1/$2');
+      }
+  
+      const [month, year] = digits.split('/');
+      const currentYear = new Date().getFullYear() % 100;
+      const currentMonth = new Date().getMonth() + 1;
+  
+      if (
+        parseInt(month) > 12 ||
+        (parseInt(year) < currentYear || (parseInt(year) === currentYear && parseInt(month) < currentMonth))
+      ) {
+        setErrors((prev) => ({ ...prev, expiryDate: 'Card expired' }));
+      } else {
+        setErrors((prev) => ({ ...prev, expiryDate: '' }));
+      }
+  
+      setPaymentInfo({ ...paymentInfo, expiryDate: digits });
+  
+    } else if (name === 'cvv') {
+      const digits = value.replace(/\D/g, '').substring(0, 3);
+      setPaymentInfo({ ...paymentInfo, cvv: digits });
+  
+    } else {
+      setPaymentInfo({ ...paymentInfo, [name]: value });
+    }
+  
+    // Clear error for other fields
+    if (errors[name]) {
       setErrors({
         ...errors,
-        [e.target.name]: '',
+        [name]: '',
       });
     }
   };
+  
+  
 
   const handleNext = () => {
     if (activeStep === 0 && !validateShippingForm()) return;
@@ -317,7 +362,7 @@ const Checkout = () => {
           </label>
         </div>
       </div>
-
+  
       <div className="space-y-2">
         <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700">
           Card Number
@@ -331,12 +376,11 @@ const Checkout = () => {
           className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
             errors.cardNumber ? 'border-red-500' : 'border-gray-200'
           }`}
-          placeholder="1234 5678 9012 3456"
           required
         />
         {errors.cardNumber && <p className="text-red-500 text-sm mt-1">{errors.cardNumber}</p>}
       </div>
-
+  
       <div className="space-y-2">
         <label htmlFor="cardName" className="block text-sm font-medium text-gray-700">
           Name on Card
@@ -354,11 +398,11 @@ const Checkout = () => {
         />
         {errors.cardName && <p className="text-red-500 text-sm mt-1">{errors.cardName}</p>}
       </div>
-
-      <div className="grid grid-cols-2 gap-6">
+  
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700">
-            Expiry Date
+            Expiry Date (MM/YY)
           </label>
           <input
             type="text"
@@ -369,9 +413,8 @@ const Checkout = () => {
             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
               errors.expiryDate ? 'border-red-500' : 'border-gray-200'
             }`}
-            placeholder="MM/YY"
             required
-          />    
+          />
           {errors.expiryDate && <p className="text-red-500 text-sm mt-1">{errors.expiryDate}</p>}
         </div>
         <div className="space-y-2">
@@ -379,7 +422,7 @@ const Checkout = () => {
             CVV
           </label>
           <input
-            type="password"
+            type="text"
             id="cvv"
             name="cvv"
             value={paymentInfo.cvv}
@@ -387,7 +430,6 @@ const Checkout = () => {
             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
               errors.cvv ? 'border-red-500' : 'border-gray-200'
             }`}
-            maxLength={4}
             required
           />
           {errors.cvv && <p className="text-red-500 text-sm mt-1">{errors.cvv}</p>}
@@ -395,6 +437,7 @@ const Checkout = () => {
       </div>
     </div>
   );
+  
 
   const renderOrderSummary = () => (
     <div className="space-y-4">

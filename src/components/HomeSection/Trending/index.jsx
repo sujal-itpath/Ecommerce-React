@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE_URL, PRODUCT_API_PATHS } from '../../../constants/apiConstants';
-import Card from '../Card';
+import { API_BASE_URL, PRODUCT_API_PATHS } from '../../../api/constants/apiConstants';
+import Card from '../../common/Card';
 
 const Trending = () => {
   const [loading, setLoading] = useState(true);

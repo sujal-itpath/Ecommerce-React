@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import { PRODUCT_API_PATHS } from '../constants/apiConstants';
+import { PRODUCT_API_PATHS } from './constants/apiConstants';
 
 export const getAllProducts = () => axiosInstance.get(PRODUCT_API_PATHS.all);
 

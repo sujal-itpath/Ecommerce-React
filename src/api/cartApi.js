@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import { CART_API_PATHS } from '../constants/apiConstants';
+import { CART_API_PATHS } from './constants/apiConstants';
 
 export const getAllCarts = () => axiosInstance.get(CART_API_PATHS.all);
 

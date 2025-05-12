@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, Heart, ShoppingCart, LogIn, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
-import { useWishlistStore } from '../../store/wishlistStore';
-import Login from '../../forms/Login';
+import { useCartStore } from '../../../store/cartStore';
+import { useWishlistStore } from '../../../store/wishlistStore';
+import Login from '../../../forms/Login';
 
 const TopBar = () => {
-  const { cartItems } = useCart();
+  const { cartItems } = useCartStore();
   const { wishlist } = useWishlistStore();
   const navigate = useNavigate();
   const [showLogin, setShowLogin] = useState(false);

@@ -26,6 +26,18 @@ const useOrderStore = create((set) => ({
     }
   },
 
+  // Remove order
+  removeOrder: (orderId) => {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      set((state) => {
+        const newOrders = state.orders.filter(order => order.id !== orderId);
+        localStorage.setItem(`orders_${userId}`, JSON.stringify(newOrders));
+        return { orders: newOrders };
+      });
+    }
+  },
+
   // Clear orders (for logout)
   clearOrders: () => {
     set({ orders: [] });

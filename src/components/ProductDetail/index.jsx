@@ -12,11 +12,12 @@ import {
   CardContent,
 } from "@mui/material";
 import ProductCard from "../Products/ProductCard";
-import { useCart } from "../../context/CartContext";
+import { useCartStore } from '../../store/cartStore';
+
 import { useNavigate } from "react-router-dom";
 
 const ProductDetail = ({ product, allProducts = [] }) => {
-  const { addToCart } = useCart();
+  const { addToCart } = useCartStore();
   const navigate = useNavigate();
 
   if (!product) return null;
