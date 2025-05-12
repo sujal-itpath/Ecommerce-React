@@ -27,7 +27,7 @@ const features = [
         </div>
   
         {/* Content */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-12 max-w-7xl mx-auto px-4">
+        <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-12 max-w-7xl mx-auto px-4">
           {/* Left Side */}
           <div className="max-w-xl w-full">
             
