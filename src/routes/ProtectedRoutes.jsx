@@ -37,7 +37,7 @@ const ProtectedRoute = () => {
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
         >
           <Alert
-            onClose={handleClose}
+            onClose={handleClose}   
             severity="warning"
             variant="filled"
             sx={{ width: "100%" }}

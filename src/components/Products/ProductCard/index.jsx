@@ -74,7 +74,7 @@ const ProductCard = ({ product }) => {
       >
         {/* Image Section */}
         <Box
-          className="relative w-full sm:w-44 h-48 sm:h-auto flex items-center justify-center bg-gradient-to-br overflow-hidden"
+          className="relative w-full sm:w-44 h-48 sm:h-auto flex items-center justify-center  overflow-hidden"
           sx={{ p: 2 }}
         >
           <Box
@@ -198,50 +198,51 @@ const ProductCard = ({ product }) => {
 
             {/* Actions */}
             <Box
-  display="flex"
-  gap={1}
-  sx={{
-    flexDirection: {
-      xs: "row-reverse", // cart left, wishlist right on small screens
-      sm: "row",         // normal order on larger screens
-    },
-  }}
->
-  <Tooltip
-    title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
-  >
-    <IconButton
-      size="small"
-      onClick={handleToggleWishlist}
-      sx={{
-        color: isInWishlist ? "#ec4899" : "gray",
-        "&:hover": { color: "#ec4899" },
-      }}
-    >
-      {isInWishlist ? (
-        <Favorite fontSize="small" />
-      ) : (
-        <FavoriteBorder fontSize="small" />
-      )}
-    </IconButton>
-  </Tooltip>
-  <Tooltip title="Add to cart">
-    <IconButton
-      size="small"
-      onClick={handleAddToCart}
-      sx={{
-        color: "white",
-        background: "linear-gradient(to right, #ec4899, #f472b6)",
-        "&:hover": {
-          background: "linear-gradient(to right, #db2777, #f43f5e)",
-        },
-      }}
-    >
-      <ShoppingCart fontSize="small" />
-    </IconButton>
-  </Tooltip>
-</Box>
-
+              display="flex"
+              gap={1}
+              sx={{
+                flexDirection: {
+                  xs: "row-reverse", // cart left, wishlist right on small screens
+                  sm: "row", // normal order on larger screens
+                },
+              }}
+            >
+              <Tooltip
+                title={
+                  isInWishlist ? "Remove from wishlist" : "Add to wishlist"
+                }
+              >
+                <IconButton
+                  size="small"
+                  onClick={handleToggleWishlist}
+                  sx={{
+                    color: isInWishlist ? "#ec4899" : "gray",
+                    "&:hover": { color: "#ec4899" },
+                  }}
+                >
+                  {isInWishlist ? (
+                    <Favorite fontSize="small" />
+                  ) : (
+                    <FavoriteBorder fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Add to cart">
+                <IconButton
+                  size="small"
+                  onClick={handleAddToCart}
+                  sx={{
+                    color: "white",
+                    background: "linear-gradient(to right, #ec4899, #f472b6)",
+                    "&:hover": {
+                      background: "linear-gradient(to right, #db2777, #f43f5e)",
+                    },
+                  }}
+                >
+                  <ShoppingCart fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
         </CardContent>
       </Card>
