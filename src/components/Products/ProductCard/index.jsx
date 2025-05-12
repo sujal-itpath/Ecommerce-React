@@ -6,7 +6,7 @@ import {
   IconButton,
   Box,
   Tooltip,
-  Chip
+  Chip,
 } from "@mui/material";
 import {
   FavoriteBorder,
@@ -18,7 +18,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useWishlistStore } from "../../../store/wishlistStore";
-import { useCartStore } from '../../../store/cartStore';
+import { useCartStore } from "../../../store/cartStore";
 
 import SnackBar from "../../common/SnackBar";
 
@@ -66,16 +66,15 @@ const ProductCard = ({ product }) => {
     <>
       <Card
         onClick={() => navigate(`/products/${product.id}`)}
-        className="group relative flex rounded-3xl border border-gray-200 transition-all duration-300 shadow-sm hover:shadow-lg overflow-hidden cursor-pointer"
+        className="group relative flex flex-col sm:flex-row rounded-3xl border border-gray-200 transition-all duration-300 shadow-sm hover:shadow-lg overflow-hidden cursor-pointer"
         style={{
-          height: "260px",
           backgroundColor: "rgba(255,255,255,0.95)",
           backdropFilter: "blur(4px)",
         }}
       >
         {/* Image Section */}
         <Box
-          className="relative w-44 h-full min-w-44 flex items-center justify-center bg-gradient-to-br overflow-hidden"
+          className="relative w-full sm:w-44 h-48 sm:h-auto flex items-center justify-center bg-gradient-to-br overflow-hidden"
           sx={{ p: 2 }}
         >
           <Box
@@ -133,7 +132,7 @@ const ProductCard = ({ product }) => {
         </Box>
 
         {/* Content Section */}
-        <CardContent className="flex-1 flex flex-col justify-between px-6 py-5 space-y-3">
+        <CardContent className="flex-1 flex flex-col justify-between px-4 py-5 space-y-3">
           {/* Category */}
           <Box
             display="flex"
@@ -169,9 +168,7 @@ const ProductCard = ({ product }) => {
                   key={star}
                   fontSize="small"
                   sx={{
-                    color: star <= product.rating?.rate
-                      ? "#ec4899"
-                      : "#e5e7eb",
+                    color: star <= product.rating?.rate ? "#ec4899" : "#e5e7eb",
                   }}
                 />
               ))}
@@ -182,7 +179,7 @@ const ProductCard = ({ product }) => {
           )}
 
           {/* Price + Action Icons */}
-          <Box className="flex items-center justify-between pt-2">
+          <Box className="flex flex-col sm:flex-row sm:items-center justify-between pt-2 gap-3 sm:gap-0">
             {/* Price */}
             <Box display="flex" alignItems="baseline" gap={1}>
               <Typography
@@ -200,43 +197,51 @@ const ProductCard = ({ product }) => {
             </Box>
 
             {/* Actions */}
-            <Box display="flex" gap={1}>
-              <Tooltip
-                title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
-              >
-                <IconButton
-                  size="small"
-                  onClick={handleToggleWishlist}
-                  sx={{
-                    color: isInWishlist ? "#ec4899" : "gray",
-                    "&:hover": { color: "#ec4899" },
-                  }}
-                >
-                  {isInWishlist ? (
-                    <Favorite fontSize="small" />
-                  ) : (
-                    <FavoriteBorder fontSize="small" />
-                  )}
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Add to cart">
-                <IconButton
-                  size="small"
-                  onClick={handleAddToCart}
-                  sx={{
-                    color: "white",
-                    background:
-                      "linear-gradient(to right, #ec4899, #f472b6)",
-                    "&:hover": {
-                      background:
-                        "linear-gradient(to right, #db2777, #f43f5e)",
-                    },
-                  }}
-                >
-                  <ShoppingCart fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
+            <Box
+  display="flex"
+  gap={1}
+  sx={{
+    flexDirection: {
+      xs: "row-reverse", // cart left, wishlist right on small screens
+      sm: "row",         // normal order on larger screens
+    },
+  }}
+>
+  <Tooltip
+    title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+  >
+    <IconButton
+      size="small"
+      onClick={handleToggleWishlist}
+      sx={{
+        color: isInWishlist ? "#ec4899" : "gray",
+        "&:hover": { color: "#ec4899" },
+      }}
+    >
+      {isInWishlist ? (
+        <Favorite fontSize="small" />
+      ) : (
+        <FavoriteBorder fontSize="small" />
+      )}
+    </IconButton>
+  </Tooltip>
+  <Tooltip title="Add to cart">
+    <IconButton
+      size="small"
+      onClick={handleAddToCart}
+      sx={{
+        color: "white",
+        background: "linear-gradient(to right, #ec4899, #f472b6)",
+        "&:hover": {
+          background: "linear-gradient(to right, #db2777, #f43f5e)",
+        },
+      }}
+    >
+      <ShoppingCart fontSize="small" />
+    </IconButton>
+  </Tooltip>
+</Box>
+
           </Box>
         </CardContent>
       </Card>

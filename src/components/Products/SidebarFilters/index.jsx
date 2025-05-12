@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Tag, DollarSign, Star, Sliders, Percent } from 'lucide-react';
+import { Tag, DollarSign, Percent, Sliders } from 'lucide-react';
 
 // Maps user-friendly names to valid CSS colors
 const colorMap = {
@@ -50,14 +50,16 @@ const ColorBadge = ({ color, selected, onClick }) => {
 };
 
 const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) => {
-  const [filters, setFilters] = useState(selectedFilters || {
+  const defaultFilters = {
     brand: [],
+    category: [],
+    color: [],
+    price: [0, 1000],
     discount: [],
     rating: [],
-    category: [],
-    price: [0, 1000],
-    color: [],
-  });
+  };
+
+  const [filters, setFilters] = useState(selectedFilters || defaultFilters);
 
   const debounceTimeoutRef = useRef(null);
 
@@ -65,14 +67,21 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
     const unique = (array, key) => {
       if (!Array.isArray(array)) return [];
       const values = array
-        .map(item => item[key])
-        .filter(Boolean)
-        .map(value => value.toString().toLowerCase());
-      return [...new Set(values)];
+        .map(item => {
+          const value = item[key];
+          if (!value) return null;
+          // Convert to string and capitalize first letter
+          return value.toString().toLowerCase().replace(/^\w/, c => c.toUpperCase());
+        })
+        .filter(Boolean);
+      return [...new Set(values)].sort();
     };
 
+    const brands = unique(allProducts, 'brand');
+    console.log('Available brands:', brands); // Debug log
+
     return {
-      uniqueBrands: unique(allProducts, 'brand'),
+      uniqueBrands: brands,
       uniqueCategories: unique(allProducts, 'category'),
       uniqueColors: unique(allProducts, 'color'),
     };
@@ -86,7 +95,7 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
 
   const handleCheck = (filterName, value) => {
     setFilters(prev => {
-      const values = prev[filterName];
+      const values = prev[filterName] || [];
       const valueToCheck = value.toString().toLowerCase();
       const updated = values.includes(valueToCheck)
         ? values.filter(v => v !== valueToCheck)
@@ -124,6 +133,7 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
   const renderCheckboxList = (filterName, options) =>
     options.map(option => {
       const optionValue = option.toString().toLowerCase();
+      const currentValues = filters[filterName] || [];
       return (
         <label
           key={option}
@@ -131,7 +141,7 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
         >
           <input
             type="checkbox"
-            checked={filters[filterName].includes(optionValue)}
+            checked={currentValues.includes(optionValue)}
             onChange={() => handleCheck(filterName, option)}
             className="text-blue-500 focus:ring-blue-500 rounded"
           />
@@ -146,55 +156,11 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
       <div>
         <div className="flex items-center gap-2 mb-3 text-gray-800">
           <Tag className="w-4 h-4" />
-          <h4 className="font-medium">Brand</h4>
+          <h4 className="font-medium">Brands</h4>
         </div>
         <div className="space-y-1 max-h-40 overflow-y-auto">
           {renderCheckboxList('brand', uniqueBrands)}
         </div>
-      </div>
-
-      {/* Discount */}
-      <div className="pt-4 border-t border-gray-100">
-        <div className="flex items-center gap-2 mb-3 text-gray-800">
-          <Percent className="w-4 h-4" />
-          <h4 className="font-medium">Discount Offer</h4>
-        </div>
-        {['10', '20', '30', '50'].map(d => (
-          <label
-            key={d}
-            className="flex items-center gap-2 px-3 py-1 rounded hover:bg-gray-100 text-gray-600"
-          >
-            <input
-              type="checkbox"
-              checked={filters.discount.includes(d)}
-              onChange={() => handleCheck('discount', d)}
-              className="text-blue-500 rounded"
-            />
-            <span>{d}% & up</span>
-          </label>
-        ))}
-      </div>
-
-      {/* Rating */}
-      <div className="pt-4 border-t border-gray-100">
-        <div className="flex items-center gap-2 mb-3 text-gray-800">
-          <Star className="w-4 h-4" />
-          <h4 className="font-medium">Rating</h4>
-        </div>
-        {[1, 2, 3, 4, 5].map(r => (
-          <label
-            key={r}
-            className="flex items-center gap-2 px-3 py-1 rounded hover:bg-gray-100 text-gray-600"
-          >
-            <input
-              type="checkbox"
-              checked={filters.rating.includes(String(r))}
-              onChange={() => handleCheck('rating', String(r))}
-              className="text-yellow-500 rounded"
-            />
-            <span>{r} Star</span>
-          </label>
-        ))}
       </div>
 
       {/* Category */}
@@ -208,6 +174,33 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
         </div>
       </div>
 
+      
+
+      {/* Discount */}
+      <div className="pt-4 border-t border-gray-100">
+        <div className="flex items-center gap-2 mb-3 text-gray-800">
+          <Percent className="w-4 h-4" />
+          <h4 className="font-medium">Discount</h4>
+        </div>
+        {['5', '10', '15', '20', '25', '30'].map(d => {
+          const currentDiscounts = filters.discount || [];
+          return (
+            <label
+              key={d}
+              className="flex items-center gap-2 px-3 py-1 rounded hover:bg-gray-100 text-gray-600"
+            >
+              <input
+                type="checkbox"
+                checked={currentDiscounts.includes(d)}
+                onChange={() => handleCheck('discount', d)}
+                className="text-blue-500 rounded"
+              />
+              <span>{d}% & up</span>
+            </label>
+          );
+        })}
+      </div>
+
       {/* Price */}
       <div className="pt-4 border-t border-gray-100">
         <div className="flex items-center gap-2 mb-3 text-gray-800">
@@ -216,8 +209,8 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
         </div>
         <div className="space-y-2">
           <div className="flex justify-between text-xs text-gray-500 mb-1">
-            <span>₹{filters.price[0]}</span>
-            <span>₹{filters.price[1]}</span>
+            <span>${filters.price[0]}</span>
+            <span>${filters.price[1]}</span>
           </div>
           <input
             type="range"
@@ -237,22 +230,21 @@ const SidebarFilters = ({ onFilterChange, allProducts = [], selectedFilters }) =
           />
         </div>
       </div>
-
       {/* Color */}
       <div className="pt-4 border-t border-gray-100">
         <div className="flex items-center gap-2 mb-3 text-gray-800">
           <Sliders className="w-4 h-4" />
-          <h4 className="font-medium">Filter by Color</h4>
+          <h4 className="font-medium">Colors</h4>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="grid grid-cols-4 gap-2">
           {uniqueColors.map(color => {
-            const normalizedColor = color.toLowerCase();
+            const currentColors = filters.color || [];
             return (
               <ColorBadge
                 key={color}
-                color={normalizedColor}
-                selected={filters.color.includes(normalizedColor)}
-                onClick={() => handleCheck('color', normalizedColor)}
+                color={color}
+                selected={currentColors.includes(color.toLowerCase())}
+                onClick={() => handleCheck('color', color)}
               />
             );
           })}

@@ -5,7 +5,7 @@ import ProductList from "./ProductList";
 import SidebarFilters from "./SidebarFilters";
 import PageContainer from "../common/Layout/PageContainer";
 import { PRODUCT_API_PATHS, API_BASE_URL } from "../../api/constants/apiConstants";
-import { Search, ShoppingBag } from "lucide-react";
+import { Search, ShoppingBag, SlidersHorizontal } from "lucide-react";
 import SearchBar from "./SearchBar";
 import SortOptions from "./SortOptions";
 import PaginationLoader from './PaginationLoader';
@@ -31,11 +31,11 @@ const Products = () => {
   });
   const [filters, setFilters] = useState({
     brand: searchParams.get('brand')?.split(',') || [],
+    category: searchParams.get('category')?.split(',') || [],
+    color: searchParams.get('color')?.split(',') || [],
+    price: searchParams.get('price')?.split(',')?.map(Number) || [0, 1000],
     discount: searchParams.get('discount')?.split(',') || [],
     rating: searchParams.get('rating')?.split(',') || [],
-    category: searchParams.get('category')?.split(',') || [],
-    price: searchParams.get('price')?.split(',')?.map(Number) || [0, 1000],
-    color: searchParams.get('color')?.split(',') || [],
   });
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
   const [sortOption, setSortOption] = useState(searchParams.get('sort') || "Most Popular");
@@ -43,6 +43,7 @@ const Products = () => {
   const [hasMore] = useState(true);
   const [limit] = useState(8);
   const [page, setPage] = useState(1);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   const observer = useRef();
   const lastProductRef = useCallback(
@@ -90,11 +91,11 @@ const Products = () => {
     const params = new URLSearchParams();
     
     if (newFilters.brand.length) params.set('brand', newFilters.brand.join(','));
+    if (newFilters.category.length) params.set('category', newFilters.category.join(','));
+    if (newFilters.color.length) params.set('color', newFilters.color.join(','));
+    if (newFilters.price[0] !== 0 || newFilters.price[1] !== 1000) params.set('price', newFilters.price.join(','));
     if (newFilters.discount.length) params.set('discount', newFilters.discount.join(','));
     if (newFilters.rating.length) params.set('rating', newFilters.rating.join(','));
-    if (newFilters.category.length) params.set('category', newFilters.category.join(','));
-    if (newFilters.price[0] !== 0 || newFilters.price[1] !== 1000) params.set('price', newFilters.price.join(','));
-    if (newFilters.color.length) params.set('color', newFilters.color.join(','));
     if (newSearch) params.set('search', newSearch);
     if (newSort !== "Most Popular") params.set('sort', newSort);
 
@@ -139,6 +140,11 @@ const Products = () => {
         return false;
       }
 
+      // Color filter
+      if (filters.color.length > 0 && (!product.color || !filters.color.includes(product.color.toString().toLowerCase()))) {
+        return false;
+      }
+
       // Price filter
       const [minPrice, maxPrice] = filters.price;
       if (product.price < minPrice || product.price > maxPrice) {
@@ -151,11 +157,6 @@ const Products = () => {
         if (!product.discount || product.discount < maxDiscount) {
           return false;
         }
-      }
-
-      // Color filter
-      if (filters.color.length > 0 && (!product.color || !filters.color.includes(product.color.toString().toLowerCase()))) {
-        return false;
       }
 
       // Rating filter
@@ -178,7 +179,7 @@ const Products = () => {
         filtered.sort((a, b) => b.price - a.price);
         break;
       case "Newest":
-        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        filtered.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         break;
       default:
         // Most Popular (default)
@@ -191,11 +192,11 @@ const Products = () => {
   const resetFilters = () => {
     const defaultFilters = {
       brand: [],
+      category: [],
+      color: [],
+      price: [0, 1000],
       discount: [],
       rating: [],
-      category: [],
-      price: [0, 1000],
-      color: [],
     };
     setFilters(defaultFilters);
     setSearchTerm("");
@@ -213,24 +214,17 @@ const Products = () => {
     applyFilters();
   }, [applyFilters]);
 
+  const toggleMobileFilters = () => {
+    setIsMobileFiltersOpen(!isMobileFiltersOpen);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white py-8 px-4 sm:px-6 lg:px-8 px-4 md:px-8 lg:px-16 xl:px-24 2xl:px-32">
-      <header className="mb-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-400 bg-clip-text text-transparent">
-              Explore Products
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Discover our curated collection of premium items
-            </p>
-          </div>
-          <SearchBar value={searchTerm} onChange={handleSearchChange} />
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+      
   
-      <div className="flex flex-col lg:flex-row gap-8">
-        <aside className="w-full lg:w-1/4 lg:sticky lg:top-4 lg:self-start">
+      <div className="flex flex-col lg:flex-row gap-8 relative">
+        {/* Sidebar for larger screens */}
+        <aside className="hidden lg:block w-full lg:w-1/4 lg:sticky lg:top-4 lg:self-start">
           <div className="backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-gray-100 max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-pink-300 scrollbar-track-gray-100">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-800">Filters</h3>
@@ -248,9 +242,58 @@ const Products = () => {
             />
           </div>
         </aside>
-  
+
+        {/* Mobile Filter Button */}
+        <div className="lg:hidden fixed bottom-4 right-4 z-50">
+          <button
+            onClick={toggleMobileFilters}
+            className="p-3 bg-pink-500 text-white rounded-full shadow-lg hover:bg-pink-600 transition-colors"
+            aria-label="Open filters"
+          >
+            <SlidersHorizontal size={24} />
+          </button>
+        </div>
+
+        {/* Sidebar for mobile screens (modal/drawer) */}
+        {isMobileFiltersOpen && (
+          <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileFilters}>
+            <aside 
+              className="fixed top-0 left-0 w-4/5 max-w-sm h-full bg-white shadow-xl p-6 overflow-y-auto z-50"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-800">Filters</h3>
+                <button
+                  className="text-sm text-pink-500 hover:text-pink-700 transition-colors cursor-pointer"
+                  onClick={resetFilters}
+                >
+                  Reset All
+                </button>
+              </div>
+              <SidebarFilters
+                onFilterChange={handleFilterChange}
+                allProducts={allProducts}
+                selectedFilters={filters}
+              />
+            </aside>
+          </div>
+        )}
+        
         <main className="flex-1">
-          <div className="mb-6 flex items-center justify-between backdrop-blur-sm p-4 rounded-xl border border-gray-100">
+        <header className="">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-400 bg-clip-text text-transparent">
+              Explore Products
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Discover our curated collection of premium items
+            </p>
+          </div>
+          <SearchBar value={searchTerm} onChange={handleSearchChange} />
+        </div>
+      </header>
+          <div className="flex items-center justify-between backdrop-blur-sm p-4 rounded-xl border border-gray-100">
             <div className="flex items-center gap-2 text-gray-600">
               <ShoppingBag className="h-5 w-5" />
               <span>{filteredProducts.length} products</span>
