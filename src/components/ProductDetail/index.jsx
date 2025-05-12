@@ -21,10 +21,10 @@ const ProductDetail = ({ product, allProducts = [] }) => {
   return (
     <div className="p-8 max-w-screen-xl mx-auto">
       {/* Top Section */}
-      <div className="bg-white p-8 rounded-xl shadow-lg mb-12">
+      <div className=" p-8 rounded-xl shadow-lg mb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Image Section */}
-          <div className="flex justify-center items-center bg-gray-100 rounded-xl p-4">
+          <div className="flex justify-center items-center rounded-xl p-4">
             <img
               src={product.image || "https://placehold.co/400x400?text=No+Image"}
               alt={product.title}
