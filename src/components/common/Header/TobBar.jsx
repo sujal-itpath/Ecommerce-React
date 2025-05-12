@@ -30,9 +30,9 @@ const TopBar = () => {
   return (
     <>
       <div className="w-full bg-purple-600 text-white py-3 shadow-sm">
-        <div className="container mx-auto px-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <div className="container mx-auto px-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           {/* Left: Contact Info */}
-          <div className="flex flex-row sm:flex-row sm:items-center justify-between gap-5 sm:gap-6 text-sm">
+          <div className="flex flex-row justify-between sm:flex-row sm:items-center gap-2 sm:gap-6 text-sm">
             <a
               href="mailto:info@hekto.com"
               className="flex items-center hover:text-purple-200 transition"
@@ -53,12 +53,13 @@ const TopBar = () => {
           <div className="block sm:hidden border-t border-purple-400"></div>
 
           {/* Right: User Actions */}
-          <div className="w-full sm:w-auto flex flex-wrap sm:flex-nowrap justify-between sm:justify-end items-center gap-3 sm:gap-6 text-sm">
-
-            <div className="flex gap-4">
+          <div className="w-full sm:w-auto flex flex-row sm:flex-nowrap items-center gap-4 text-sm">
+            <div className="flex flex-1 sm:flex-none items-center gap-6 sm:gap-10">
               {/* Wishlist */}
-              <button 
-                onClick={() => (isLoggedIn ? navigate("/wishlist") : setShowLogin(true))}
+              <button
+                onClick={() =>
+                  isLoggedIn ? navigate("/wishlist") : setShowLogin(true)
+                }
                 className="relative flex items-center hover:text-purple-200 transition"
               >
                 <Heart size={16} className="mr-1" />
@@ -71,7 +72,9 @@ const TopBar = () => {
 
               {/* Cart */}
               <button
-                onClick={() => (isLoggedIn ? navigate("/cart") : setShowLogin(true))}
+                onClick={() =>
+                  isLoggedIn ? navigate("/cart") : setShowLogin(true)
+                }
                 className="relative flex items-center hover:text-purple-200 transition"
               >
                 <ShoppingCart size={16} />
@@ -82,36 +85,33 @@ const TopBar = () => {
                 )}
               </button>
 
-              {/* Login */}
-              {!isLoggedIn && (
+              {/* Login or Logout aligned to right */}
+              {!isLoggedIn ? (
                 <button
                   onClick={() => setShowLogin(true)}
-                  className="flex items-center hover:text-purple-200 transition"
+                  className="ml-auto flex items-center hover:text-purple-200 transition"
                 >
                   <LogIn size={16} className="mr-1" />
                   Login
                 </button>
-              )}
-            </div>
-
-            {/* Logout (pushed far right) */}
-            {isLoggedIn && (
-              <div className="ml-auto">
+              ) : (
                 <button
                   onClick={handleLogout}
-                  className="flex items-center hover:text-purple-200 transition"
+                  className="ml-auto flex items-center hover:text-purple-200 transition"
                 >
                   <LogOut size={16} className="mr-1" />
                   Logout
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Login Modal */}
-      {showLogin && <Login onClose={() => setShowLogin(false)} isModal={true} />}
+      {showLogin && (
+        <Login onClose={() => setShowLogin(false)} isModal={true} />
+      )}
     </>
   );
 };
