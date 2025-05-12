@@ -462,8 +462,8 @@ const Checkout = () => {
         </div>
         <div className="border-t border-gray-200 pt-3">
           <div className="flex justify-between">
-            <span className="text-lg font-semibold">Total</span>
-            <span className="text-lg font-semibold">${subtotal.toFixed(2)}</span>
+            <span className="text-lg  font-semibold">Total</span>
+            <span className="text-lg text-pink-600 font-semibold">${subtotal.toFixed(2)}</span>
           </div>
         </div>
       </div>

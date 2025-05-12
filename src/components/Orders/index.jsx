@@ -144,7 +144,7 @@ const Orders = () => {
                     <div className="pt-4 border-t border-gray-200">
                       <div className="flex justify-between items-center">
                         <span className="font-medium text-gray-900">Total Amount</span>
-                        <span className="text-lg font-semibold">${order.total.toFixed(2)}</span>
+                        <span className="text-lg font-semibold text-pink-600">${order.total.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>

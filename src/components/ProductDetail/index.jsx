@@ -1,20 +1,7 @@
 import React from "react";
-import {
-  Box,
-  Typography,
-  Chip,
-  Rating,
-  Divider,
-  Button,
-  Grid,
-  Card,
-  CardMedia,
-  CardContent,
-} from "@mui/material";
-import ProductCard from "../Products/ProductCard";
-import { useCartStore } from '../../store/cartStore';
-
 import { useNavigate } from "react-router-dom";
+import ProductCard from "../Products/ProductCard";
+import { useCartStore } from "../../store/cartStore";
 
 const ProductDetail = ({ product, allProducts = [] }) => {
   const { addToCart } = useCartStore();
@@ -22,7 +9,6 @@ const ProductDetail = ({ product, allProducts = [] }) => {
 
   if (!product) return null;
 
-  // Filter related products from the same category (excluding the current one)
   const relatedProducts = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 3);
@@ -33,201 +19,123 @@ const ProductDetail = ({ product, allProducts = [] }) => {
   };
 
   return (
-    <Box p={{ xs: 2, md: 4 }} maxWidth="1200px" mx="auto" bgcolor="#f9fafb">
-      <Grid container spacing={4} alignItems="flex-start">
-        {/* Product Image */}
-        <Grid item xs={12} md={5}>
-          <Box
-            bgcolor="white"
-            borderRadius={4}
-            p={2}
-            boxShadow={3}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-          >
-            <CardMedia
-              component="img"
-              image={product.image || "https://placehold.co/300x300.png?text=Image+Not+Available"}
+    <div className="p-8 max-w-screen-xl mx-auto">
+      {/* Top Section */}
+      <div className="bg-white p-8 rounded-xl shadow-lg mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Image Section */}
+          <div className="flex justify-center items-center bg-gray-100 rounded-xl p-4">
+            <img
+              src={product.image || "https://placehold.co/400x400?text=No+Image"}
               alt={product.title}
-              onError={(e) => {
-              e.target.src =
-                "https://placehold.co/300x300.png?text=Image+Not+Available";
-              }}
-              sx={{
-                objectFit: "contain",
-                height: "350px",
-                maxWidth: "100%",
-              }}
+              className="max-h-96 object-contain"
             />
-          </Box>
-        </Grid>
+          </div>
 
-        {/* Product Info */}
-        <Grid item xs={12} md={7}>
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Typography variant="h4" fontWeight={600} color="text.primary">
-              {product.title}
-            </Typography>
+          {/* Product Info Section */}
+          <div>
+            <h1 className="text-4xl font-semibold mb-4">{product.title}</h1>
 
-            <Box display="flex" gap={1} flexWrap="wrap">
-              {product.category && (
-                <Chip
-                  label={product.category.toUpperCase()}
-                  color="secondary"
-                  size="small"
-                  variant="outlined"
-                />
-              )}
+            <div className="flex gap-2 flex-wrap mb-4">
+              <span className="px-4 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700">
+                {product.category.toUpperCase()}
+              </span>
               {product.brand && (
-                <Chip
-                  label={product.brand.toUpperCase()}
-                  sx={{ backgroundColor: "#f9a8d4", color: "white" }}
-                  size="small"
-                />
+                <span className="px-4 py-1 bg-primary text-white rounded-md text-sm font-medium">
+                  {product.brand}
+                </span>
               )}
-            </Box>
+            </div>
 
-            <Rating
-              name="product-rating"
-              value={product.rating?.rate || 0}
-              precision={0.5}
-              readOnly
-            />
-            <Typography variant="body2" color="text.secondary">
-              ({product.rating?.count || 0} reviews)
-            </Typography>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-yellow-500">⭐⭐⭐⭐☆</span>
+              <span className="text-sm text-gray-600">
+                ({product.rating?.count || 0} reviews)
+              </span>
+            </div>
 
-            <Typography variant="h5" fontWeight="bold" color="secondary">
-              ${product.price}
-            </Typography>
+            <div className="mt-4 mb-6">
+              <p className="text-2xl font-semibold text-green-600">
+                ${product.price.toFixed(2)}
+              </p>
+              {product.discount > 0 && (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="line-through text-gray-500">
+                    ${(product.price * (1 + product.discount / 100)).toFixed(2)}
+                  </span>
+                  <span className="bg-red-600 text-white text-xs py-1 px-2 rounded-full">
+                    -{product.discount}%
+                  </span>
+                </div>
+              )}
+            </div>
 
-            {product.discount > 0 && (
-              <Box display="flex" gap={2} alignItems="center">
-                <Typography
-                  variant="body2"
-                  sx={{ textDecoration: "line-through", color: "gray" }}
-                >
-                  ${(product.price * (1 + product.discount / 100)).toFixed(2)}
-                </Typography>
-                <Chip
-                  label={`-${product.discount}%`}
-                  sx={{
-                    background: "#ec4899",
-                    color: "white",
-                    fontWeight: 600,
-                  }}
-                  size="small"
-                />
-              </Box>
-            )}
+            <p className="text-sm text-gray-600 mb-4">
+              {product.model && `Model: ${product.model} `}
+              {product.color && `| Color: ${product.color}`}
+            </p>
 
-            <Typography variant="body2" color="text.secondary">
-              {product.model && `Model: ${product.model}`}
-              {product.color && ` | Color: ${product.color}`}
-            </Typography>
-
-            <Button
-              variant="contained"
-              size="large"
+            <button
               onClick={handleAddToCart}
-              sx={{
-                mt: 2,
-                py: 1.5,
-                background: "#ec4899",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                "&:hover": {
-                  background: "#db2777",
-                },
-              }}
+              className="w-full bg-green-600 text-white py-3 px-4 rounded-md text-lg font-semibold hover:bg-green-700 transition"
             >
               Add to Cart
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Description */}
-      <Box mt={6} p={3} bgcolor="white" borderRadius={4} boxShadow={1}>
-        <Typography variant="h6" fontWeight={600} gutterBottom>
-          Description
-        </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          whiteSpace="pre-line"
-        >
-          {product.description}
-        </Typography>
-      </Box>
+      <div className="bg-white p-8 rounded-xl shadow-lg mb-12">
+        <h2 className="text-2xl font-semibold mb-4">Product Description</h2>
+        <p className="text-gray-600">{product.description}</p>
+      </div>
 
       {/* Specifications */}
-      <Box mt={6} p={3} bgcolor="white" borderRadius={4} boxShadow={1}>
-        <Typography variant="h6" fontWeight={600} gutterBottom>
-          Specifications
-        </Typography>
-        <Grid container spacing={2}>
-          {product.brand && (
-            <Grid item xs={6} sm={3}>
-              <Typography variant="body2">Brand</Typography>
-              <Typography fontWeight={500}>{product.brand}</Typography>
-            </Grid>
+      <div className="bg-white p-8 rounded-xl shadow-lg mb-12">
+        <h2 className="text-2xl font-semibold mb-4">Specifications</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            { label: "Brand", value: product.brand },
+            { label: "Model", value: product.model },
+            { label: "Color", value: product.color },
+            { label: "Category", value: product.category },
+          ].map(
+            (item, i) =>
+              item.value && (
+                <div key={i} className="flex flex-col">
+                  <span className="text-sm text-gray-500">{item.label}</span>
+                  <span className="font-medium">{item.value}</span>
+                </div>
+              )
           )}
-          {product.model && (
-            <Grid item xs={6} sm={3}>
-              <Typography variant="body2">Model</Typography>
-              <Typography fontWeight={500}>{product.model}</Typography>
-            </Grid>
-          )}
-          {product.color && (
-            <Grid item xs={6} sm={3}>
-              <Typography variant="body2">Color</Typography>
-              <Typography fontWeight={500}>{product.color}</Typography>
-            </Grid>
-          )}
-          {product.category && (
-            <Grid item xs={6} sm={3}>
-              <Typography variant="body2">Category</Typography>
-              <Typography fontWeight={500}>{product.category}</Typography>
-            </Grid>
-          )}
-        </Grid>
-      </Box>
+        </div>
+      </div>
 
       {/* Reviews */}
-      <Box mt={6} p={3} bgcolor="white" borderRadius={4} boxShadow={1}>
-        <Typography variant="h6" fontWeight={600} gutterBottom>
-          Customer Reviews
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          ★★★★☆ ({product.rating?.rate || 0}/5 from {product.rating?.count || 0}{" "}
-          reviews)
-        </Typography>
-        <Divider sx={{ my: 2 }} />
-        <Typography variant="body2" fontStyle="italic">
-          “Great product quality and value for money!” – Verified Buyer
-        </Typography>
-      </Box>
+      <div className="bg-white p-8 rounded-xl shadow-lg mb-12">
+        <h2 className="text-2xl font-semibold mb-4">Customer Reviews</h2>
+        <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+          <span className="text-yellow-500">⭐⭐⭐⭐☆</span>
+          <span>
+            ({product.rating?.rate || 0}/5 from {product.rating?.count || 0} reviews)
+          </span>
+        </div>
+        <div className="border-t border-gray-300 pt-4 mt-4">
+          <p className="italic text-gray-600">“Great product quality and value for money!” – Verified Buyer</p>
+        </div>
+      </div>
 
       {/* Related Products */}
-      <Box mt={6}>
-        <Typography
-          variant="h6"
-          fontWeight={600}
-          gutterBottom
-          color="secondary"
-        >
-          Related Products
-        </Typography>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-4">
+      <div>
+        <h2 className="text-2xl font-semibold mb-6 text-gray-800">You may also like</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {relatedProducts.map((item) => (
             <ProductCard key={item.id} product={item} />
           ))}
         </div>
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 
