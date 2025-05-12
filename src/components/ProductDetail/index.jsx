@@ -55,7 +55,7 @@ const ProductDetail = ({ product, allProducts = [] }) => {
             </div>
 
             <div className="mt-4 mb-6">
-              <p className="text-2xl font-semibold text-green-600">
+              <p className="text-2xl font-semibold text-pink-600">
                 ${product.price.toFixed(2)}
               </p>
               {product.discount > 0 && (
@@ -77,7 +77,7 @@ const ProductDetail = ({ product, allProducts = [] }) => {
 
             <button
               onClick={handleAddToCart}
-              className="w-full bg-green-600 text-white py-3 px-4 rounded-md text-lg font-semibold hover:bg-green-700 transition"
+              className="w-full bg-pink-500 text-white py-3 px-4 rounded-md text-lg font-semibold hover:bg-pink-600 transition"
             >
               Add to Cart
             </button>
