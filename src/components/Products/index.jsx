@@ -253,6 +253,14 @@ const Products = () => {
         {/* Main Content */}
         <main className="flex-1">
           <div className="flex flex-col gap-6">
+            {/* Heading */}
+            <div className="mb-4 sm:px-14 ">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-pink-700 bg-clip-text text-transparent">
+                Explore Products
+              </h1>
+              <p className="text-gray-600 mt-2">Discover our curated collection of amazing products</p>
+            </div>
+
             {/* Search and Sort Bar */}
             <div className="flex flex-col sm:flex-row items-end sm:items-center justify-between gap-4 px-8  sm:px-14">
               <div className="w-full sm:w-64 order-1 sm:order-1">
