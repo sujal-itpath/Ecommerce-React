@@ -7,6 +7,7 @@ export const PRODUCT_API_PATHS = {
   byId: (id) => `/products/${id}`,
   categories: '/products/category',
   byCategory: (categoryName) => `/products/category/${categoryName}`,
+  paginated: (page, limit) => `/products?page=${page}&limit=${limit}`,
 };
 
 export const USER_API_PATHS = {
